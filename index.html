@@ -9,47 +9,59 @@
         <script type="text/javascript" src="./js/steem.min.js"></script>
         <script type="text/javascript" src="./js/cookie.min.js"></script>
         <script type="text/javascript" src="./js/isotope.min.js"></script>
-        <script type="text/javascript" src="./js/main.min.js"></script>
-        <link rel="stylesheet" href="./css/styles.min.css">
+        <script type="text/javascript" src="./js/tooltipster.min.js"></script>
+        <script type="text/javascript" src="./js/tooltipster.bundle.min.js"></script>
+        <script type="text/javascript" src="./js/main.js"></script>
+        <link rel="stylesheet" href="./css/styles.css">
+        <link rel="stylesheet" href="./css/tooltipster.min.css">
+        <link rel="stylesheet" href="./css/tooltipster.bundle.min.css">
     </head>  
     <body>
         <div class="header">
-            <img src="./img/logo.png"/>           
-            <input type="text" id="user" value=""/>             
+            <img src="./img/logo.png"/>   
+            <div class="header-controls-box">
+                <label class="title">Пользователь</label>
+                <input type="text" id="user" class="input tooltip" title="Аккаунт, по которому ведется статистика" value=""/>  
+                <label class="title">Кол-во постов</label>
+                <input type="number" id="post_count" class="input tooltip" title='Количество последних постов, по которым будет расчитываться статистика'/>
+            
+                <input type="button" class="simple-button settings-submit" value="Применить"/>
+            </div>
+            
         </div>
       
         <div class="container-fluid info-header">
             <div class="row">
                 <div class="main-account-box col-lg-7">
                     <div class="img-circle" id="main-avatar"></div>
-                    <div id="level"></div>
+                    <div id="level" class='tooltip' title='Статус-ранг аккаунта.'></div>
                     <div id="profile_caption"></div>
                     <div class="account-data">
                         <div>
-                            <div>
+                            <div class='tooltip' title='Точная репутация'>
                                 <label>Репутация</label>
                                 <div id="reputation"></div>
                             </div>
-                            <div>
+                            <div class='tooltip' title='Доступный % Силы Голоса. В сутки восстанавливается до 20%.'>
                                 <label>Доступная СГ</label>
                                 <div id="voting_power"></div>
                             </div>
                         </div>
                         <div>
-                            <div>
+                            <div class='tooltip' title='Количество токенов Голос в Силе Голоса.'>
                                 <label>Сила Голоса</label>
                                 <div id="power"></div>
                             </div>
-                            <div>
+                            <div class='tooltip' title='Внутренний показатель вашей Силы Голоса. Используется в коде системы для математических расчётов.'>
                                 <label>Mgests</label>
                                 <div id="gests"></div>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="profit-line-box col-lg-5">
+                <div class="profit-line-box col-lg-5" >
                     <h3>Приблизительный рост СГ</h3>
-                    <ul class="markers">
+                    <ul class="markers tooltip" title='Держатели Силы Голоса получают 15% от общей годовой инфляции токенов Голос. Исходя из СГ текущего аккаунта расчитывается прирост СГ по временной шкале'>
                           <li>
                             <div class="title">
                                   Час                     
@@ -91,6 +103,26 @@
                             </div>
                           </li>
                     </ul>      
+                </div>
+                <div class="filter-line col-lg-12">
+                    <form id="filter_form">
+                        
+                        <label class="title">Упорядочить по:</label>
+                        <span>
+                            <input type="radio" name="sort_by" class="radio" id="radio-1" value="reward" checked/>
+                            <label for="radio-1">Общему весу</label>
+                        </span>
+                        <span>
+                            <input type="radio" name="sort_by" class="radio" id="radio-2" value="upvotes_cnt"/>
+                            <label for="radio-2">Кол-ву апвоутов</label>
+                        </span>
+                        <span>
+                            <input type="radio" name="sort_by" class="radio" id="radio-3" value="average_sp"/>
+                            <label for="radio-3">Средней СГ</label>
+                        </span>
+                        
+                        <!--input type="button" class="simple-button filter-submit" value="Применить"/-->
+                    </form>
                 </div>
             </div>
         </div>
