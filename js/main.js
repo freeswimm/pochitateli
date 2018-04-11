@@ -15,7 +15,7 @@ var COOKIE_EXPIRES = 360;  // время действия всех кук в д�
 var postCount = 5; // кол-во последних постов
 var holder_reward = 15; // % награды держателям голоса
 var inflation_rate = 15; // Годовая инфляция:
-var WS = 'wss://ws.golos.io'; // wss://api.golos.cf - нода @vik// wss://ws.golos.io - публичная
+var WS = 'wss://ws17.golos.io'; //'wss://ws.golos.io'; // wss://api.golos.cf - нода @vik// wss://ws.golos.io - публичная
 var DOMAIN = 'https://golos.io/';
 var debug = true;
 // ------------------------------
@@ -34,11 +34,11 @@ var color_theme = {
 
 // установить текушую дату
 var now = new Date(); // 2000-12-31T00:00:00'
-var curDate = now.getFullYear()+'-'+now.getMonth()+'-'+now.getDate()+'T'+now.getHours()+':'+now.getMinutes()+':'+now.getSeconds();  
+var curDate = now.getFullYear()+'-'+(now.getMonth()+1)+'-'+now.getDate()+'T'+now.getHours()+':'+now.getMinutes()+':'+now.getSeconds();  
 
 var account = $('#user').val();
 
-steem.api.setWebSocket(WS);
+golos.config.set('websocket', WS);
 
 $('.tooltip').tooltipster();
 
@@ -96,7 +96,7 @@ setInterval(function () {
 function init(){
     account = $('#user').val(); 
     postCount = $('#post_count').val();
-    if (account !== ''){            
+    if (account !== ''){      
          mainStream();
     }else{
         $('.voter-column, .info-header').hide();
@@ -137,7 +137,7 @@ function mainStream(){
     // создать объекты с кураторами и внести их в таблицу gui 
     Promise.all([getUserPosts()])
     .then(getCurators)
-    .then(function(){renderTable();})
+    .then(function(){renderTable(); })
     .then(function(){  loadingShow(false); })
     .catch(function(error) { $('#errors').html(error); }); 
 }
@@ -145,11 +145,14 @@ function mainStream(){
 // вернуть последние postCount постов юзера
 function getUserPosts(){
     return new Promise(function(resolve, reject) {
-        steem.api.getDiscussionsByAuthorBeforeDate(account, '', curDate, postCount, function(err, results) {      
+      
+        golos.api.getDiscussionsByAuthorBeforeDate(account, '', curDate, postCount, function(err, results) {      
+           
             if(err === null){
                 userPosts = results;
                 resolve(results);                
             } else {
+                console.log(err);
                 reject(err);
             }
         });
@@ -178,7 +181,9 @@ function getCurators(){
                             
                             var post_rshares = getPostShares(post);
                             var post_payout_value = getPostPayout(post);
-                                                       
+                         
+                            //$('#filter_form').after('<div>'+post.title+'</div><br/>');      
+                                                 
                             // выбрать кураторов из каждого поста
                             post.active_votes.forEach(function(item){ 
                                 // 
@@ -205,7 +210,7 @@ function getCurators(){
                 });
 
                 // добавить аватары и линки на профайл кураторов                   
-                steem.api.getAccounts(Object.keys(userVoters), function(err, voters_data){
+                golos.api.getAccounts(Object.keys(userVoters), function(err, voters_data){
                     if(err === null){ 
                         if(voters_data.length > 0){
                             voters_data.forEach(function(profile){ 
@@ -252,10 +257,10 @@ function renderTable(){
                 if(userVoters.hasOwnProperty(prop)) {  
                     var color_class = getColorByRate(userVoters[prop].curation_rate)+'-palette';
                     var reward = (userVoters[prop].upvote_reward).toFixed(2);    
-                    var reputation = (1*userVoters[prop].reputation).toFixed(0);
+                    var reputation = Math.floor(1*userVoters[prop].reputation);
                     var avatar = (userVoters[prop].avatar == false) ? 'img/blanc.png' : 'https://imgp.golos.io/120x120/'+userVoters[prop].avatar;
                     var sp_average = (1*userVoters[prop].upvote_power_perc).toFixed(0);
-                    rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-average_sp="'+sp_average+'" data-upvotes_cnt="'+userVoters[prop].cnt+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div><div class="voter-reputation tooltip" title="Репутация куратора">'+reputation+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt tooltip" title="Количество постов, за которые проголосовал куратор">'+userVoters[prop].cnt+'</span><span>/</span><span class="tooltip" title="Количество последних постов, по которым собирается статистика">'+postCount+'</span></div><div class="grid-item-footer"><div class="tooltip" title="Средняя Сила Голоса, с которой голосует куратор за последние '+userVoters[prop].cnt+' пост(ов)"><div> Средняя СГ </div><div class="average-sp"> '+sp_average+'% </div></div><div class="tooltip" title="Количество Золотых, которые принес куратор за последние '+userVoters[prop].cnt+' пост(ов)"><div> Всего GBG </div><div class="total-reward">'+reward+'</div></div><div class="tooltip" title="Доля куратора в распределении Золотых за последние '+userVoters[prop].cnt+' пост(ов)"><div class="total-upvotes-weight"> Общий вес </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
+                    rows += '<div class="grid-item '+color_class+'" data-link="'+userVoters[prop].link+'" data-average_sp="'+sp_average+'" data-upvotes_cnt="'+userVoters[prop].cnt+'" data-reward="'+reward+'"><div class="grid-item-header"><div class="grid-item-header-text">'+userVoters[prop].name+'</div><div class="voter-reputation tooltip" title="Репутация куратора">'+reputation+'</div></div>  <div class="grid-item-body"><div class="grid-item-vote-cnt"><span class="upvotes-cnt tooltip" title="Количество постов, за которые проголосовал куратор">'+userVoters[prop].cnt+'</span><span> из </span><span class="tooltip" title="Количество последних постов, по которым собирается статистика">'+postCount+'</span></div><div class="grid-item-footer"><div class="tooltip" title="Средняя Сила Голоса, с которой голосует куратор за последние '+userVoters[prop].cnt+' пост(ов)"><div> Средняя СГ </div><div class="average-sp"> '+sp_average+'% </div></div><div class="tooltip" title="Количество Золотых, которые принес куратор за последние '+userVoters[prop].cnt+' пост(ов)"><div> Всего GBG </div><div class="total-reward">'+reward+'</div></div><div class="tooltip" title="Доля куратора в распределении Золотых за последние '+userVoters[prop].cnt+' пост(ов)"><div class="total-upvotes-weight"> Общий вес </div><div> '+userVoters[prop].curation_rate+'% </div></div></div></div> <div class="img-circle wrap-ava" style="background: url('+avatar+') no-repeat #ffffff; "></div><div class="img-circle wrap-ava-2" ></div></div>';
                 }
             }
             
@@ -329,7 +334,7 @@ function getPostPayout(post){
 }
 
 function getGlobalData(callback){
-    steem.api.getDynamicGlobalProperties(function(err, result) {
+    golos.api.getDynamicGlobalProperties(function(err, result) {
         if(err === null){
             callback(result);
         }else{
@@ -340,7 +345,7 @@ function getGlobalData(callback){
 }
 
 function getAccountData(callback){
-    steem.api.getAccounts([account], function(err, response){
+    golos.api.getAccounts([account], function(err, response){
         if(err === null){            
             callback(response);
         }else{
@@ -374,9 +379,10 @@ function showInfo(){
         $('#reputation').html(getReputation(userData[0].reputation));
        
         // показать общую силу голоса для аккаунта
-        if(golosData !== null){
+        if(golosData !== null){           
             movementGlobal = golosData.total_vesting_shares.split(' ')[0];
             powerGlobal = golosData.total_vesting_fund_steem.split(' ')[0];
+            
             $('#power').html((powerGlobal * (accountGests / movementGlobal)).toFixed(3));
         }   
         // показать общую силу голоса для аккаунта
@@ -384,13 +390,13 @@ function showInfo(){
         
         // уровень аккаунта
         $('#level').html('<img src="http://golosboard.com/@'+account+'/level.png" width="65px"/>');       
-        //_d(steem.formatter.vestToSteem(userData[0].reputation));
-        showRewardsGrid();       
+        //_d(golos.formatter.vestToSteem(userData[0].reputation));
+        showRewardsGrid();  
     }
 }
 
 // показать таблицу с прогнозом наград
-function showRewardsGrid(){
+function showRewardsGrid(){ 
     if(golosData !== null){
         
         // текущая капитализация голоса
@@ -404,7 +410,7 @@ function showRewardsGrid(){
         
         // годовая награда всем держателям силы голоса
         var golos_holder_year_rewards = total_year_delta*holder_reward/100;
-
+   
         // вносим данные в таблицу (по дням, часам итп)
         $('.profit-line-box #year-profit').text((golos_holder_year_rewards*account_power_share).toFixed(3));
         $('.profit-line-box #month-profit').text((golos_holder_year_rewards*account_power_share*30/365).toFixed(3));
